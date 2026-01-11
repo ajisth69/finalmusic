@@ -52,7 +52,7 @@ const httpsAgent = new https.Agent({
     keepAliveMsecs: 30000,
     maxSockets: 50,
     maxFreeSockets: 10,
-    timeout: 60000
+    timeout: 0 // No timeout - unlimited streaming
 });
 
 const httpAgent = new http.Agent({
@@ -60,7 +60,7 @@ const httpAgent = new http.Agent({
     keepAliveMsecs: 30000,
     maxSockets: 50,
     maxFreeSockets: 10,
-    timeout: 60000
+    timeout: 0 // No timeout - unlimited streaming
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -283,7 +283,7 @@ app.get('/stream/:videoId', async (req, res) => {
                         const proxyReq = proto.request(currentUrl, {
                             agent,
                             headers,
-                            timeout: 20000,
+                            timeout: 0, // No timeout - unlimited streaming
                             method: 'GET'
                         }, (proxyRes) => {
                             // Handle redirects
@@ -340,10 +340,11 @@ app.get('/stream/:videoId', async (req, res) => {
                             reject(err);
                         });
 
-                        proxyReq.on('timeout', () => {
-                            proxyReq.destroy();
-                            reject(new Error('Timeout'));
-                        });
+                        // Timeout disabled for unlimited streaming
+                        // proxyReq.on('timeout', () => {
+                        //     proxyReq.destroy();
+                        //     reject(new Error('Timeout'));
+                        // });
 
                         req.on('close', () => {
                             proxyReq.destroy();
